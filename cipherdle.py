@@ -1,6 +1,7 @@
 import random
 import string
 import os
+from datetime import datetime, timedelta
 
 def clear_console():
     # Clear console screen for Windows
@@ -20,7 +21,8 @@ def read_words_from_file(file_path):
             words_list.append(word)
     return words_list
 
-def generate_cipher():
+def generate_cipher(seed):
+    random.seed(seed)
     cipher = {}
     plainAlphabet = list(string.ascii_lowercase)
     cipherAlphabet = list(string.ascii_lowercase)
@@ -29,6 +31,10 @@ def generate_cipher():
         cipherAlphabet.remove(cipherChoice)
         cipher[letterChoice] = cipherChoice
     return cipher
+
+def generate_word(seed):
+    random.seed(seed)
+    return random.choice(puzzleWords)
 
 def print_cipher_nicely(cipher):
     for letter, cipher in cipher.items():
@@ -44,7 +50,7 @@ def print_cipher_nicely(cipher):
 def is_guess_valid(guess):
     return guess in guessableWords
 
-def guess_print(guess, answer): # THIS IS THE WORST FUNCTION I HAVE EVER WRITTEN
+def guess_print(guess, answer, spoiler): # THIS IS THE WORST FUNCTION I HAVE EVER WRITTEN
     green = []
     yellow = []
     yellowTwo = []
@@ -58,13 +64,13 @@ def guess_print(guess, answer): # THIS IS THE WORST FUNCTION I HAVE EVER WRITTEN
                 yellowTwo.append(m)
     for n in range(wordSize):
         if n in green:
-            print(colors.GREEN + guess[n] + colors.RESET, end="")
+            print(colors.GREEN + guess[n] + colors.RESET, end="") if not spoiler else print(colors.GREEN + "🟩" + colors.RESET, end="")
             greenLetters.append(guess[n])
         elif n in yellow:
-            print(colors.YELLOW + guess[n] + colors.RESET, end="")  
+            print(colors.YELLOW + guess[n] + colors.RESET, end="") if not spoiler else print(colors.YELLOW + "🟨" + colors.RESET, end="")
             yellowLetters.append(guess[n])            
         else:
-            print(guess[n], end="")
+            print(guess[n], end="") if not spoiler else print("⬜", end="")
             grayLetters.append(guess[n])   
     print("")
     
@@ -72,7 +78,7 @@ def print_board():
     if not len(guessHistory) == 0:
         print("Your guess history is:")
         for guess in guessHistory:
-            guess_print(guess, puzzleWord)   
+            guess_print(guess, puzzleWord, False)   
     clear_console()
     # print("The answer is " + puzzleWord)
     print("Your cipher is:")
@@ -80,10 +86,37 @@ def print_board():
     if not len(guessHistory) == 0:
         print("Your guess history is:")
         for guess in guessHistory:
-            guess_print(guess, puzzleWord)        
+            guess_print(guess, puzzleWord, False)        
+            
+def reset_game(): # This function is pretty bad too
+    global grayLetters
+    global yellowLetters
+    global greenLetters
+    global lives   
+    global gameRunning 
+    global guessHistory
+    global dailyGame
+    grayLetters = []
+    yellowLetters = []
+    greenLetters = []
+    lives = 7   
+    gameRunning = True
+    guessHistory = []  
+    dailyGame = False    
 
+   
+def get_daily_seed(current_date):
+    current_date = current_date
+    current_datetime = datetime.combine(current_date, datetime.min.time())
+    timestamp = int(current_datetime.timestamp())
+    # print(timestamp)
+    return timestamp
     
-    
+def spoiler_guess_history_print():
+    for guess in guessHistory:
+        guess_print(guess, puzzleWord, True)
+        
+
 class colors:
     RESET = '\033[0m'
     RED = '\033[91m'
@@ -96,52 +129,62 @@ class colors:
     GRAY = '\033[90m'
 
 
-gameRunning = True
+gameRunning = False
+guessValid = True
 programRunning = True
+dailyGame = False
 wordSize = 5
 lives = 7
 guessableWords = read_words_from_file("guessablewords.txt")
 puzzleWords = read_words_from_file("puzzleWords.txt")
-puzzleWord = random.choice(puzzleWords)
 grayLetters = []
 yellowLetters = []
 greenLetters = []
-cipher = generate_cipher()
+puzzleWord = generate_word(1)
+cipher = generate_cipher(1)
 print_cipher_nicely(cipher)
 guessHistory = []
 
-
+clear_console()
 while(programRunning):
     if gameRunning == False:
-        if input("Type \"exit\" to exit, type anything else to play a new game:") == "exit":
+        userInput = input("Type \"exit\" to exit, type 1 to play the daily game, type 2 to free-play:")
+        if userInput == "exit":
             programRunning = False
-        else: 
-            gameRunning = True
-            guessHistory = []  
-            puzzleWord = random.choice(puzzleWords)
-            cipher = generate_cipher()
-            grayLetters = []
-            yellowLetters = []
-            greenLetters = []
-            lives = 7
+        elif userInput == "1":
+            current_date = datetime.now().date()
+            seed = get_daily_seed(current_date)
+            puzzleWord = generate_word(seed)
+            cipher = generate_cipher(seed)   
+            reset_game()
+            dailyGame = True
+        elif userInput == "2": 
+            puzzleWord = generate_word(random.random())
+            cipher = generate_cipher(random.random())
+            reset_game()
     while(gameRunning):
         print_board()
+        if not guessValid:
+            print("invalid guess!")
         user_input = input(f"You have {lives} guesses left."+" Type your guess (or type \"exit\" to quit):\n" )
         if user_input == "exit": 
             gameRunning = False
-            programRunning = False
+            programRunning = True
             break
         if is_guess_valid(user_input):
+            guessValid = True
             guessHistory.append(user_input)
             lives = lives - 1
+            print_board()
             if user_input == puzzleWord:
-                print_board()
                 print("YOU WIN! The word was " + puzzleWord)
+                if dailyGame:
+                    print("Cipherdle", current_date.strftime("%Y-%m-%d"))
+                    spoiler_guess_history_print()
                 gameRunning = False
             elif lives == 0:
-                print_board()
                 print("GAME OVER! The words was " + puzzleWord)
                 gameRunning = False
         else:
-            print("invalid guess!")
+            guessValid = False
         
