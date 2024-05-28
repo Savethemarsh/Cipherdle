@@ -44,26 +44,28 @@ def print_cipher_nicely(cipher):
 def is_guess_valid(guess):
     return guess in guessableWords
 
-def guess_print(guess, answer):
-    solvedLetters = []
+def guess_print(guess, answer): # THIS IS THE WORST FUNCTION I HAVE EVER WRITTEN
+    green = []
+    yellow = []
+    yellowTwo = []
     for n in range(wordSize):
         if cipher[guess[n]] == answer[n]:
-            solvedLetters.append(n)
+            green.append(n)
+    for n in range(wordSize):
+        for m in range(wordSize):
+            if cipher[guess[n]] == answer[m] and not n in green and not m in green and not n in yellow and not m in yellowTwo:
+                yellow.append(n)
+                yellowTwo.append(m)
+    for n in range(wordSize):
+        if n in green:
             print(colors.GREEN + guess[n] + colors.RESET, end="")
             greenLetters.append(guess[n])
+        elif n in yellow:
+            print(colors.YELLOW + guess[n] + colors.RESET, end="")  
+            yellowLetters.append(guess[n])            
         else:
-            yellowPrint = False
-            for m in range(wordSize):
-                if cipher[guess[n]] == answer[m] and not m in solvedLetters:
-                    solvedLetters.append(m)
-                    yellowPrint = True
-                    break
-            if yellowPrint:
-                print(colors.YELLOW + guess[n] + colors.RESET, end="")
-                yellowLetters.append(guess[n])
-            else:
-                grayLetters.append(guess[n])
-                print(guess[n], end="")
+            print(guess[n], end="")
+            grayLetters.append(guess[n])   
     print("")
     
 def print_board():
@@ -71,8 +73,8 @@ def print_board():
         print("Your guess history is:")
         for guess in guessHistory:
             guess_print(guess, puzzleWord)   
-    # print("The answer is " + puzzleWord)
     clear_console()
+    # print("The answer is " + puzzleWord)
     print("Your cipher is:")
     print_cipher_nicely(cipher)
     if not len(guessHistory) == 0:
@@ -97,7 +99,7 @@ class colors:
 gameRunning = True
 programRunning = True
 wordSize = 5
-lives = 6
+lives = 7
 guessableWords = read_words_from_file("guessablewords.txt")
 puzzleWords = read_words_from_file("puzzleWords.txt")
 puzzleWord = random.choice(puzzleWords)
@@ -121,7 +123,7 @@ while(programRunning):
             grayLetters = []
             yellowLetters = []
             greenLetters = []
-            lives = 6
+            lives = 7
     while(gameRunning):
         print_board()
         user_input = input(f"You have {lives} guesses left."+" Type your guess (or type \"exit\" to quit):\n" )
