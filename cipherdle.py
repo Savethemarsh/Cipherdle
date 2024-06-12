@@ -106,11 +106,10 @@ def reset_game(): # This function is pretty bad too
 
    
 def get_daily_seed(current_date):
-    current_date = current_date
-    current_datetime = datetime.combine(current_date, datetime.min.time())
-    timestamp = int(current_datetime.timestamp())
-    # print(timestamp)
-    return timestamp
+    epoch_date = date(1970, 1, 1)
+    difference = current_date - epoch_date
+    # print(difference)
+    return difference.days
     
 def spoiler_guess_history_print():
     for guess in guessHistory:
