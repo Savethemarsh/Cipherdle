@@ -54,6 +54,10 @@ def guess_print(guess, answer, spoiler): # THIS IS THE WORST FUNCTION I HAVE EVE
     green = []
     yellow = []
     yellowTwo = []
+    purple = []
+    if guess == answer:
+        for n in range(wordSize):
+            purple.append(n)
     for n in range(wordSize):
         if cipher[guess[n]] == answer[n]:
             green.append(n)
@@ -63,11 +67,25 @@ def guess_print(guess, answer, spoiler): # THIS IS THE WORST FUNCTION I HAVE EVE
                 yellow.append(n)
                 yellowTwo.append(m)
     for n in range(wordSize):
-        if n in green:
-            print(colors.GREEN + guess[n] + colors.RESET, end="") if not spoiler else print(colors.GREEN + "🟩" + colors.RESET, end="")
+        if n in purple:
+            if not spoiler:
+                print(colors.MAGENTA + guess[n] + colors.RESET, end="")
+            else:
+                print(colors.MAGENTA + "🟪" + colors.RESET, end="")  
+                print("\b", end="")      
+        elif n in green:
+            if not spoiler:
+                print(colors.GREEN + guess[n] + colors.RESET, end="")
+            else:
+                print(colors.GREEN + "🟩" + colors.RESET, end="")
+                print("\b", end="")    
             greenLetters.append(guess[n])
         elif n in yellow:
-            print(colors.YELLOW + guess[n] + colors.RESET, end="") if not spoiler else print(colors.YELLOW + "🟨" + colors.RESET, end="")
+            if not spoiler:
+                print(colors.YELLOW + guess[n] + colors.RESET, end="")
+            else:
+                print(colors.YELLOW + "🟨" + colors.RESET, end="")
+                print("\b", end="")    
             yellowLetters.append(guess[n])            
         else:
             print(guess[n], end="") if not spoiler else print("⬜", end="")
