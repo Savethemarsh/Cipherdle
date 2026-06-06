@@ -72,20 +72,20 @@ def guess_print(guess, answer, spoiler): # THIS IS THE WORST FUNCTION I HAVE EVE
                 print(colors.MAGENTA + guess[n] + colors.RESET, end="")
             else:
                 print(colors.MAGENTA + "🟪" + colors.RESET, end="")  
-                print("\b", end="")      
+                #print("\b", end="")      
         elif n in green:
             if not spoiler:
                 print(colors.GREEN + guess[n] + colors.RESET, end="")
             else:
                 print(colors.GREEN + "🟩" + colors.RESET, end="")
-                print("\b", end="")    
+                #print("\b", end="")    
             greenLetters.append(guess[n])
         elif n in yellow:
             if not spoiler:
                 print(colors.YELLOW + guess[n] + colors.RESET, end="")
             else:
                 print(colors.YELLOW + "🟨" + colors.RESET, end="")
-                print("\b", end="")    
+                #print("\b", end="")    
             yellowLetters.append(guess[n])            
         else:
             print(guess[n], end="") if not spoiler else print("⬜", end="")
